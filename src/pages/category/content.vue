@@ -1,0 +1,199 @@
+<template>
+  <div class="content-wrapper">
+    <div class="loading-container" v-if="isLoading">
+<!--      <my-loading/>-->
+      <div class="loading-wrapper">
+        <my-loading/>
+      </div>
+    </div>
+    <my-scroll ref="scroll">
+      <div class="content">
+        <div class="pic" v-if="content.banner">
+          <a :href="content.banner.linkUrl" class="pic-link">
+            <img v-lazy="content.banner.picUrl" @load="updateScroll" alt="" class="pic-img">
+          </a>
+        </div>
+        <div class="section"
+          v-for="(section,index) of content.data"
+             :key="index"
+        >
+          <h4 class="section-title">{{section.name}}</h4>
+          <ul class="section-list">
+            <li
+              class="section-item"
+              v-for="(item, i) of section.itemList"
+              :key="i"
+            >
+              <a href="" class="section-link">
+                <p class="section-pic">
+                  <img v-lazy="item.picUrl" alt="" class="section-img" />
+                </p>
+                <p class="section-name">{{item.name}}</p>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </my-scroll>
+    <div class="g-backtop-container">
+      <my-backtop @backtop="backToTop" :visible="isBacktopVisible"/>
+    </div>
+  </div>
+</template>
+
+<script>
+import MyLoading from 'base/loading'
+import MyScroll from 'base/scroll'
+import MyBacktop from 'base/backtop'
+import {getCategoryContent} from 'api/category'
+
+export default {
+  name: 'categoryContent',
+  components: {
+    MyLoading,
+    MyScroll,
+    MyBacktop
+  },
+  props: {
+    curId: {
+      type: String,
+      default: ''
+    }
+  },
+  data () {
+    return {
+      isLoading: false,
+      content: {},
+      isBacktopVisible: false
+    }
+  },
+  watch: {
+    curId (id) {
+      this.isLoading = true
+      this.getContent(id).then(() => {
+        this.isLoading = false
+        this.backToTop(0)
+      })
+    }
+  },
+  methods: {
+    backToTop (speed) {
+      this.$refs.scroll && this.$refs.scroll.scrollToTop(speed)
+    },
+    getContent (id) {
+      return getCategoryContent(id).then(data => {
+        if (data) {
+          this.content = data
+        }
+      })
+    },
+    updateScroll () {
+      this.$refs.scroll && this.$refs.scroll.update()
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+  @import "~assets/scss/mixins";
+
+  .content-wrapper {
+    position: relative;
+    height: 100%;
+  }
+
+  .loading-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: $category-popup-z-index;
+    @include flex-center();
+    width: 100%;
+    height: 100%;
+    /*background-color: $modal-bgc;*/
+
+    .mine-loading {
+      color: #fff;
+      font-size: 14px;
+    }
+  }
+  .loading-wrapper {
+    width: 50%;
+    padding: 30px 0;
+    background-color: $modal-bgc;
+    border-radius: 4px;
+  }
+
+  .content {
+    padding: 10px;
+  }
+
+  .pic {
+    margin-bottom: 12px;
+
+    &-link {
+      display: block;
+    }
+
+    &-img {
+      width: 100%;
+    }
+  }
+
+  .section {
+    margin-bottom: 12px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    &-title {
+      height: 28px;
+      line-height: 28px;
+      color: #080808;
+      font-weight: bold;
+    }
+
+    &-list {
+      display: flex;
+      flex-wrap: wrap;
+      background-color: #fff;
+      padding: 10px 10px 0;
+    }
+
+    &-item {
+      width: (100% / 3);
+    }
+
+    &-link {
+      display: block;
+    }
+
+    &-pic {
+      position: relative;
+      width: 80%;
+      padding-bottom: 80%;
+      margin: 0 auto;
+    }
+
+    &-img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    &-name {
+      height: 36px;
+      line-height: 36px;
+      text-align: center;
+      @include ellipsis();
+    }
+  }
+
+  .g-backtop-container {
+    bottom: 10px;
+  }
+
+</style>
