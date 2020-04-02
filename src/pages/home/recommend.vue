@@ -57,6 +57,7 @@ export default {
             this.totalPage = data.totalPage
             this.recommends = this.recommends.concat(data.itemList)
             this.$emit('loaded', this.recommends)
+            this.$store.commit('initRecommends', this.recommends)
             resolve()
           }
         })

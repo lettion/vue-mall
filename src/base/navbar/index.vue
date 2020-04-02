@@ -36,6 +36,7 @@ export default {
     background-color: #fff;
     &-left{
       margin-left: 10px;
+      // 这个选择器表示如果在&-left的兄弟或者后代找得到.mine-navbar-right就让它的样式设置成position: static;
       ~ .mine-navbar-right{
         position: static;
       }

@@ -46,6 +46,8 @@ import MyLoading from 'base/loading'
 import MyScroll from 'base/scroll'
 import MyBacktop from 'base/backtop'
 import {getCategoryContent} from 'api/category'
+import storage from 'assets/js/storage'
+import {CATEGORY_CONTENT_KEY, CATEGORY_CONTENT_UPDATE_TIME_INTERVAL} from './config'
 
 export default {
   name: 'categoryContent',
@@ -81,11 +83,44 @@ export default {
       this.$refs.scroll && this.$refs.scroll.scrollToTop(speed)
     },
     getContent (id) {
-      return getCategoryContent(id).then(data => {
-        if (data) {
-          this.content = data
+      let contents = storage.get(CATEGORY_CONTENT_KEY)
+      let updateTime
+      const curTime = new Date().getTime()
+      if (contents && contents[id]) {
+        updateTime = contents[id].updateTime || 0
+        if (curTime - updateTime < CATEGORY_CONTENT_UPDATE_TIME_INTERVAL) {
+          return this.getContentByLocalStorage(contents[id])
+        } else {
+          return this.getContentByHttp(id).then(() => {
+            this.updateLocalStorage(contents, id, curTime)
+          })
         }
+      } else {
+        return this.getContentByHttp(id).then(() => {
+          this.updateLocalStorage(contents, id, curTime)
+        })
+      }
+    },
+    getContentByLocalStorage (content) {
+      this.content = content.data
+      return Promise.resolve()
+    },
+    getContentByHttp (id) {
+      return getCategoryContent(id).then(data => {
+        return new Promise(resolve => {
+          if (data) {
+            this.content = data
+            resolve()
+          }
+        })
       })
+    },
+    updateLocalStorage (contents, id, curTime) {
+      contents = contents || {}
+      contents[id] = {}
+      contents[id].data = this.content
+      contents[id].updateTime = curTime
+      storage.set(CATEGORY_CONTENT_KEY, contents)
     },
     updateScroll () {
       this.$refs.scroll && this.$refs.scroll.update()

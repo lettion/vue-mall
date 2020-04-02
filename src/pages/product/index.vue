@@ -1,10 +1,25 @@
 <template>
-    <div class="product">Product</div>
+    <div class="product">
+      <header class="g-header-container">
+        <product-header></product-header>
+      </header>
+      <my-scroll>
+        <product-slider></product-slider>
+      </my-scroll>
+    </div>
 </template>
 
 <script>
+import productHeader from './header'
+import ProductSlider from './slider'
+import MyScroll from 'base/scroll'
 export default {
-  name: 'Product'
+  name: 'Product',
+  components: {
+    productHeader,
+    ProductSlider,
+    MyScroll
+  }
 }
 </script>
 

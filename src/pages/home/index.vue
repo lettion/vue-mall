@@ -49,9 +49,6 @@ export default {
     }
   },
   methods: {
-    updataScroll () {
-
-    },
     pullDownTransitionEnd () {
       this.$refs.header.show()
     },
